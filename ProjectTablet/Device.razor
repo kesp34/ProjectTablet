@@ -1,0 +1,54 @@
+﻿@page "/device/{Identifier}"
+@page "/device/{CurrentDate:datetime}"
+
+@inherits DeviceBase
+
+<PageTitle>Device Rooms</PageTitle>
+
+<section class="spaces-device">
+    @foreach (var groupedReservation in Schedule.GroupBy(b => b.Start.Date))
+    {
+        <section class="spaces-device spaces-device--@space?.Line">
+            <div class="spaces-device__header">
+                <div>
+                    <div>
+                        <span><img src="//assets/img/bg_spaces_@(space?.Name.ToLower().Replace(" ", "_"))_white_icon.png" /></span>
+                    </div>
+                    <div>@space?.DisplayName</div>
+                </div>
+            </div>
+
+            @foreach (var reservation in groupedReservation)
+            {
+                <div class="container-device">
+                    <div class="container-device@((IsActiveReservation(reservation.Start, reservation.End)) ? "__active" : "__content")">
+                        <div>
+                            <div>@reservation.Company</div>
+                            <span>@reservation.Start.ToLocalTime().ToShortTimeString() - @reservation.End.ToLocalTime().ToShortTimeString()</span>
+                        </div>
+                        <div>
+                            <div>@reservation.FullName</div>
+                        </div>
+                        <div>
+                            <hr>
+                        </div>
+                        <div>
+                            <span>@reservation.Topic</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </section>
+    }
+</section>
+
+@code
+{
+    private bool IsActiveReservation(DateTime startTime, DateTime endTime)
+    {
+        DateTime currentMoment = DateTime.Now.ToLocalTime();
+        DateTime activeWindow = startTime.AddMinutes(-15);
+        DateTime closingWindow = endTime;
+        return currentMoment >= activeWindow && currentMoment <= closingWindow;
+    }
+}
